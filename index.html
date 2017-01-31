@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Josefin+Sans" />
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Jura" />
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu" />
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lobster" />
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato" />
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway" />
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Sans" />
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Homemade+Apple" />
+	<link rel="stylesheet" href="style/stylesheet.css" type="text/css" />
+	<script type="text/javascript" language="javascript" src="scripts/jquery-1.11.3.min.js"></script>
+	<script type="text/javascript" language="javascript" src="scripts/main.js"></script>
+</head>
+<body onload="main.init();">
+
+	<div id="sidebar">
+		
+		<h1>TOOL BAR</h1>
+
+		<div id="canvas_size">
+			<h3>Sizes</h3>
+			<div class="row"><label for="canvas_width">Width:</label>&nbsp;<input type="text" id="canvas_width" value="" />&nbsp;px</div>
+			<div class="row"><label for="canvas_height">Height:</label>&nbsp;<input type="text" id="canvas_height" value="" />&nbsp;px</div>
+			<div class="row"><label for="square_size">Square:</label>&nbsp;<input type="text" id="square_size" value="" />&nbsp;px</div>
+		</div>
+
+		<div id="toolset">			
+			<div class="tool active" data-tooltype="draw">DRAW</div>
+			<div class="tool" data-tooltype="erase">ERASE</div>
+		</div>
+
+	</div>
+
+	<div id="content">
+		
+		<canvas id="viewport"></canvas>
+
+	</div>
+
+</body>
+</html>
