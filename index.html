@@ -1,14 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Josefin+Sans" />
-	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Jura" />
-	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu" />
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lobster" />
-	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato" />
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway" />
-	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Sans" />
-	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Homemade+Apple" />
 	<link rel="stylesheet" href="style/stylesheet.css" type="text/css" />
 	<script type="text/javascript" language="javascript" src="scripts/jquery-1.11.3.min.js"></script>
 	<script type="text/javascript" language="javascript" src="scripts/main.js"></script>
@@ -19,24 +13,36 @@
 		
 		<h1>TOOL BAR</h1>
 
-		<div id="canvas_size">
+		<div id="canvas_size" class="section">
 			<h3>Sizes</h3>
-			<div class="row"><label for="canvas_width">Width:</label>&nbsp;<input type="text" id="canvas_width" value="" />&nbsp;px</div>
-			<div class="row"><label for="canvas_height">Height:</label>&nbsp;<input type="text" id="canvas_height" value="" />&nbsp;px</div>
-			<div class="row"><label for="square_size">Square:</label>&nbsp;<input type="text" id="square_size" value="" />&nbsp;px</div>
+			<div class="row"><label for="canvas_width">Width:</label>&nbsp;<input type="text" id="canvas_width" value="3000" />&nbsp;px</div>
+			<div class="row"><label for="canvas_height">Height:</label>&nbsp;<input type="text" id="canvas_height" value="1000" />&nbsp;px</div>
+			<div class="row"><label for="square_size">Square:</label>&nbsp;<input type="text" id="square_size" value="15" />&nbsp;px</div>
+			<div id="apply_btn" class="btn">APPLY</div>
 		</div>
 
-		<div id="toolset">			
-			<div class="tool active" data-tooltype="draw">DRAW</div>
-			<div class="tool" data-tooltype="erase">ERASE</div>
+		<div id="settings" class="section">
+			<h3>Settings</h3>
+			<div class="row"><label for="toggle_grid" class="bump up7 left10">Show Grid</label>&nbsp;<input type="checkbox" id="toggle_grid" class="settings_checkbox" value=""></div>
+		</div>
+
+		<div id="toolset" class="section">
+			<h3>Tools</h3>
+			<div class="tool btn active" data-tooltype="draw">DRAW</div>
+			<div class="tool btn" data-tooltype="erase">ERASE</div>
+		</div>
+
+		<div id="actions" class="section">
+			<h3>Actions</h3>
+			<div class="action yellow btn" data-action="load">LOAD</div>
+			<div class="action green btn" data-action="export">EXPORT</div>
+			<div class="action red btn" data-action="reset">RESET</div>
 		</div>
 
 	</div>
 
-	<div id="content">
-		
+	<div id="content">		
 		<canvas id="viewport"></canvas>
-
 	</div>
 
 </body>

@@ -1,23 +1,86 @@
 
 * { padding:0px; margin:0px; }
-html, body { background-color:#222222; font:normal 14pt "Josefin Sans", "Century Gothic", Verdana, sans-serif; color:#FFFFFF; width:100%; height:100%; }
+html, body { background-color:#212121; font:normal 14pt Raleway, "Century Gothic", Verdana, sans-serif; color:#DCDCDC; width:100%; height:100%; min-height:900px; }
 
 .row { width:100%; height:30px; margin-bottom:5px; }
+.bump { position:relative; }
+.bump.up1  { bottom: 1px; }
+.bump.up2  { bottom: 2px; }
+.bump.up3  { bottom: 3px; }
+.bump.up4  { bottom: 4px; }
+.bump.up5  { bottom: 5px; }
+.bump.up6  { bottom: 6px; }
+.bump.up7  { bottom: 7px; }
+.bump.up8  { bottom: 8px; }
+.bump.up9  { bottom: 9px; }
+.bump.up10 { bottom:10px; }
 
-#sidebar { width:200px; height:100%; padding:50px 20px 0px 20px; box-sizing:border-box; box-shadow:0px 0px 5px #000000; float:left; }
+.bump.down1  { top: 1px; }
+.bump.down2  { top: 2px; }
+.bump.down3  { top: 3px; }
+.bump.down4  { top: 4px; }
+.bump.down5  { top: 5px; }
+.bump.down6  { top: 6px; }
+.bump.down7  { top: 7px; }
+.bump.down8  { top: 8px; }
+.bump.down9  { top: 9px; }
+.bump.down10 { top:10px; }
+
+.bump.left1  { right: 1px; }
+.bump.left2  { right: 2px; }
+.bump.left3  { right: 3px; }
+.bump.left4  { right: 4px; }
+.bump.left5  { right: 5px; }
+.bump.left6  { right: 6px; }
+.bump.left7  { right: 7px; }
+.bump.left8  { right: 8px; }
+.bump.left9  { right: 9px; }
+.bump.left10 { right:10px; }
+
+.bump.right1  { left: 1px; }
+.bump.right2  { left: 2px; }
+.bump.right3  { left: 3px; }
+.bump.right4  { left: 4px; }
+.bump.right5  { left: 5px; }
+.bump.right6  { left: 6px; }
+.bump.right7  { left: 7px; }
+.bump.right8  { left: 8px; }
+.bump.right9  { left: 9px; }
+.bump.right10 { left:10px; }
+
+#sidebar { width:200px; height:100%; padding-top:50px; box-sizing:border-box; box-shadow:0px 0px 5px #000000; float:left; }
 #sidebar h1 { font-size:20pt; font-weight:normal; text-align:center; margin-bottom:20px; }
-#sidebar h3 { font:normal 16pt Ubuntu, "Century Gothic", Verdana, sans-serif; margin-bottom:10px; color:#11BE41; }
+#sidebar h3 { font:normal 18pt Lobster, "Century Gothic", Verdana, sans-serif; margin-bottom:10px; color:#14FFEC; }
+#sidebar .section { padding:10px 20px; margin-bottom:20px; border-bottom:1px solid #111111; }
+#sidebar .btn { background-color:#323232; color:#111111; border:1px solid #111111; text-align:center; }
+#sidebar .btn:hover { background-color:#0D7377; cursor:pointer; }
+#sidebar .btn.active { background-color:#0D7377; }
 
-#sidebar #canvas_size { padding-bottom:10px; margin-bottom:20px; border-bottom:1px dotted #111111; }
+#sidebar #canvas_size {  }
 #sidebar #canvas_size .row { text-align:right; }
 #sidebar #canvas_size .row input { width:50px; padding:5px; font-size:12pt; text-align:right; }
+#sidebar #canvas_size #apply_btn { width:100%; padding:10px 0px; margin-top:10px; }
 
-#sidebar #toolset { padding-bottom:10px; border-bottom:1px dotted #111111; }
-#sidebar #toolset .tool { width:158px; padding:30px 0px; border:1px solid #121212; margin-bottom:5px; text-align:center; }
-#sidebar #toolset .tool.active { background-color:#267B31; color:#222222; }
-#sidebar #toolset .tool:hover:not(.active) { background-color:#439637; color:#222222; cursor:pointer; }
+#sidebar #settings {  }
+#sidebar #settings .row { width:140px; margin-right:20px; text-align:right; }
+#sidebar #settings .row .settings_checkbox { width:30px; height:30px; }
 
-#content { height:100%; float:left;}
+#sidebar #toolset {  }
+#sidebar #toolset .tool { width:158px; padding:30px 0px; margin-bottom:5px; }
+
+#sidebar #actions {  }
+#sidebar #actions .action { width:100%; padding:5px 0px; margin-bottom:5px; }
+#sidebar #actions .action.yellow { background-color:#FDDD2D; }
+#sidebar #actions .action.yellow:hover { background-color:#FDE34E; }
+#sidebar #actions .action.green { background-color:#11BE41; }
+#sidebar #actions .action.green:hover { background-color:#14EB51; }
+#sidebar #actions .action.red { background-color:#C51B20; }
+#sidebar #actions .action.red:hover { background-color:#E01F25; }
+
+#content { height:100%; float:left; }
+#content #viewport { background-color:#000000; margin:10px 0px 0px 10px; }
+#content #viewport.draw:hover { cursor:copy; }
+#content #viewport.erase:hover { cursor:not-allowed; }
 
 /** CLEARFIX for floated elements */
 .cf:before, .cf:after { content:""; display:table; } /* For modern browsers */
