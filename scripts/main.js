@@ -1,3 +1,117 @@
+/**********************
+*****  ULILITIES  *****
+**********************/
+
+var Vector2 = function(x, y) {
+    this.x = x;
+    this.y = y;
+};
+
+function random(min, max) {
+    return Math.floor(Math.random() * (max - min + 1) + min);
+}
+
+function SecondsToTime (s) {
+	var h, m, s;
+	s = Number(s);
+	h = Math.floor(s / 3600);
+	m = Math.floor(s % 3600 / 60);
+	s = Math.floor(s % 3600 % 60);
+	return ((h > 0 ? h + ":" + (m < 10 ? "0" : "") : "") + m + ":" + (s < 10 ? "0" : "") + s);
+}
+
+/****************************
+*****  RECTANGLE CLASS  *****
+****************************/
+function Rectangle (x, y, width, height) {
+	this.x		= x;
+	this.y		= y;
+	this.width	= width;
+	this.height	= height;
+	this.left	= this.x;
+	this.top	= this.y;
+	this.right	= this.x + this.width;
+	this.bottom	= this.y + this.height;
+	this.center	= new Vector2((this.x + (this.width/2)), (this.y + (this.height/2)));
+}
+
+/***********************
+*****  LINE CLASS  *****
+***********************/
+function Line (startPos, endPos, color, collision, normal, sound) {
+	this.startPos	= startPos;
+	this.endPos		= endPos;
+	this.color		= color;
+	this.collision	= collision;
+	this.normal		= normal;
+	this.sound		= sound;
+};
+
+Line.prototype.draw = function () {
+	main.context.save();
+	main.context.lineWidth = 2;
+	main.context.strokeStyle = (typeof this.color === 'undefined') ? '#00FF88' : this.color;
+	main.context.beginPath();
+	main.context.moveTo(this.startPos.x, this.startPos.y);
+	main.context.lineTo(this.endPos.x, this.endPos.y);
+	main.context.stroke();
+	main.context.closePath();
+	main.context.restore();
+};
+
+/**************************
+*****  TEXTURE CLASS  *****
+**************************/
+function Texture (pos, size, fillColor, lineWidth, lineColor)  {
+	this.pos		= pos;
+	this.size		= size;
+	this.fillColor	= fillColor;
+	this.lineColor	= lineColor;
+}
+
+Texture.prototype.update = function (pos) {
+	this.pos = pos;
+};
+
+Texture.prototype.setSize = function (size) {
+	this.size = size;
+};
+
+Texture.prototype.draw = function () {
+	main.context.save();
+	main.context.beginPath();
+	main.context.rect(this.pos.x, this.pos.y, this.size.x, this.size.y);
+	main.context.fillStyle = this.fillColor;
+	main.context.fill();
+	main.context.lineWidth = this.lineWidth;
+	main.context.strokeStyle = this.lineColor;
+	main.context.stroke();
+	main.context.closePath();
+	main.context.restore();
+};
+
+/*************************
+*****  SPRITE CLASS  *****
+*************************/
+function Sprite (path, pos, size) {
+	this.pos	= pos;
+	this.size	= size;
+	this.img	= document.createElement('img');
+	this.img.setAttribute('src', path);
+}
+
+Sprite.prototype.SetImage = function (path) {
+	this.img.setAttribute('src', path);
+};
+
+Sprite.prototype.update = function (pos) {
+	this.pos	= pos;
+};
+
+Sprite.prototype.draw = function () {
+	main.context.drawImage(this.img, this.pos.x, this.pos.y);
+};
+
 /*******************************************
 **************  CAMERA CLASS  **************
 *******************************************/
@@ -80,26 +194,57 @@ var main = {
 		this.grid 				= [];
 		this.tiles				= [];
 		this.selected_tool		= 'DRAW';
+		this.helper_block		= new Texture(new Vector2(0, 0), new Vector2(main.SQUARE, main.SQUARE), '#444444', 1, '#333333');
+		this.show_helper_block	= false;
+
+		viewport = $('#viewport');
 
 		// Event Handlers
 		$(window).on('resize', main.buttons.apply);
 		$('#apply_btn').on('click', main.buttons.apply);
 		$('.tool').on('click', main.buttons.tools);
+		$('.setting').on('click', main.buttons.settings);
 		$('.action').on('click', main.buttons.actions);
-		$('#viewport').on('mouseover', main.onCanvasHover);
+		this.canvas.addEventListener('mouseover', function (e) { main.input.mouse.onCanvasHover(); }, false);
+		this.canvas.addEventListener('mousemove', function (e) { main.input.mouse.onMouseMove(e); }, false);
+		//this.canvas.addEventListener('mouseover', function (e) { main.input.mouse.onCanvasHover }, false);
 
 		main.initialize();
 	},
 	initialize: function () {
 		main.buttons.apply();
 	},
-	onCanvasHover: function () {
-		$('#viewport').removeClass('draw').removeClass('erase');
-		$('#viewport').addClass(main.selected_tool.toLowerCase());
+	input: {
+		mouse: {
+			onCanvasHover: function () {
+				var viewport;
+				viewport = $('#viewport');
+				viewport.removeClass('draw').removeClass('erase').removeClass('move');
+				viewport.addClass(main.selected_tool.toLowerCase());
+			},
+			onMouseMove: function (e) {
+				var tool, mouseX, mouseY;
+				// mouseX = e.
+				console.log(e);
+			}
+		}
+	},
+	loadGrid: function () {
+		var x, y;
+
+		// RESET
+		main.grid = [];
+		// BUILD
+		for (y = 0; y < Math.ceil(main.WORLD_HEIGHT / main.SQUARE); y++) {
+			for (x = 0; x < Math.ceil(main.WORLD_WIDTH / main.SQUARE); x++) {
+				this.grid.push(new Texture(new Vector2(x * main.SQUARE, y * main.SQUARE), new Vector2(main.SQUARE, main.SQUARE), 'transparent', 1, '#111111'));
+			}
+
+		}
 	},
 	buttons: {
 		apply: function () {
-			var docWidth, docHeight, viewport;
+			var docWidth, docHeight, viewport, square;
 			docWidth  			= $(document).width() - 220;
 			docHeight 			= $(document).height() - 20;
 			viewport 			= $('#viewport');
@@ -108,11 +253,19 @@ var main = {
 			main.WORLD_HEIGHT		= $('#canvas_height').val();
 			main.VIEW_WIDTH 		= (main.WORLD_WIDTH > docWidth) ? docWidth : main.WORLD_WIDTH;
 			main.VIEW_HEIGHT 		= (main.WORLD_HEIGHT > docHeight) ? docHeight : main.WORLD_HEIGHT;
+			main.SQUARE 			= $('#square_size').val();
 			// Apply dimensions
 			main.canvas.width 		= main.VIEW_WIDTH;
 			main.canvas.height 		= main.VIEW_HEIGHT;
+			// Reset Grid Settings
+			main.showGrid = false;
+			$('#toggle_grid').attr('checked', false);
+			main.loadGrid();
+			// Update Helper Block
+			main.helper_block.setSize(new Vector2(main.SQUARE, main.SQUARE));
 			// Update Viewport
 			main.camera.updateViewport();
+			main.draw();
 		},
 		tools: function () {
 			var that, type, tools;
@@ -123,14 +276,38 @@ var main = {
 			that.addClass('active');
 			main.selected_tool = type;
 		},
+		settings: function () {
+			var that, type;
+			that = $(this);
+			type = that.val();
+
+			if (type === 'GRID') {
+				main.showGrid = (main.showGrid) ? false : true;
+			}
+
+			// Refresh Canvas
+			main.draw();
+
+		},
 		actions: function () {
 			console.log($(this));	
 		}
 	},
 	draw: function () {
+		var g;
 
 		main.context.clearRect(0, 0, main.VIEW_WIDTH, main.VIEW_HEIGHT);
 		main.camera.begin();
+
+		if (main.showGrid) {
+			for (g = 0; g < main.grid.length; g++) {
+				main.grid[g].draw();
+			}
+		}
+
+		if (main.show_helper_block)
+			main.helper_block.draw();
+
 		main.camera.end();
 	}
 

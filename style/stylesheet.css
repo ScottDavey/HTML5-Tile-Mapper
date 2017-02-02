@@ -63,10 +63,10 @@ html, body { background-color:#212121; font:normal 14pt Raleway, "Century Gothic
 
 #sidebar #settings {  }
 #sidebar #settings .row { width:140px; margin-right:20px; text-align:right; }
-#sidebar #settings .row .settings_checkbox { width:30px; height:30px; }
+#sidebar #settings .row .setting.checkbox { width:30px; height:30px; }
 
 #sidebar #toolset {  }
-#sidebar #toolset .tool { width:158px; padding:30px 0px; margin-bottom:5px; }
+#sidebar #toolset .tool { width:158px; padding:20px 0px; margin-bottom:5px; }
 
 #sidebar #actions {  }
 #sidebar #actions .action { width:100%; padding:5px 0px; margin-bottom:5px; }
@@ -79,8 +79,9 @@ html, body { background-color:#212121; font:normal 14pt Raleway, "Century Gothic
 
 #content { height:100%; float:left; }
 #content #viewport { background-color:#000000; margin:10px 0px 0px 10px; }
-#content #viewport.draw:hover { cursor:copy; }
-#content #viewport.erase:hover { cursor:not-allowed; }
+#content #viewport.draw:hover { cursor: url("../cursors/cursor_draw.png"), default; }
+#content #viewport.erase:hover { cursor: url("../cursors/cursor_erase.png"), default; }
+#content #viewport.move:hover { cursor:move; }
 
 /** CLEARFIX for floated elements */
 .cf:before, .cf:after { content:""; display:table; } /* For modern browsers */
