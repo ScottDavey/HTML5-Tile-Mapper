@@ -66,6 +66,7 @@ function Texture (pos, size, fillColor, lineWidth, lineColor)  {
 	this.pos		= pos;
 	this.size		= size;
 	this.fillColor	= fillColor;
+	this.lineWidth 	= lineWidth;
 	this.lineColor	= lineColor;
 }
 
@@ -194,8 +195,6 @@ var main = {
 		this.grid 				= [];
 		this.tiles				= [];
 		this.selected_tool		= 'DRAW';
-		this.helper_block		= new Texture(new Vector2(0, 0), new Vector2(main.SQUARE, main.SQUARE), '#444444', 1, '#333333');
-		this.show_helper_block	= false;
 
 		viewport = $('#viewport');
 
@@ -207,6 +206,7 @@ var main = {
 		$('.action').on('click', main.buttons.actions);
 		this.canvas.addEventListener('mouseover', function (e) { main.input.mouse.onCanvasHover(); }, false);
 		this.canvas.addEventListener('mousemove', function (e) { main.input.mouse.onMouseMove(e); }, false);
+		this.canvas.addEventListener('mousedown', function (e) { main.input.mouse.onMouseDown(e); }, false);
 		//this.canvas.addEventListener('mouseover', function (e) { main.input.mouse.onCanvasHover }, false);
 
 		main.initialize();
@@ -224,8 +224,33 @@ var main = {
 			},
 			onMouseMove: function (e) {
 				var tool, mouseX, mouseY;
-				// mouseX = e.
-				console.log(e);
+				
+			},
+			onMouseDown: function (e) {
+				var mouseButton, mouseX, mouseY;
+				mouseButton = e.button;
+				mouseX		= e.offsetX;
+				mouseY		= e.offsetY;
+
+				// NEED TO FIGURE OUT how to check if mouse remains down - like using a while loop or something.
+
+				if (main.selected_tool === 'DRAW') {
+					/* 
+					** WHAT I SHOULD DO: Build the main.tiles array with transparent/black textures
+					** Then, with a quick calculation check what tile the mouse cursor is
+					** hovering over and set that array index as a texture object. This 
+					** will avoid adding more textures than the grid can hold (or stacking
+					** textures) 
+					**/
+					main.tiles.push(new Texture(new Vector2(mouseX, mouseY), new Vector2(main.SQUARE, main.SQUARE), '#FFFFFF', 0, 'transparent'));				
+				} else if (main.selected_tool === 'ERASE') {
+					/* 
+					** In this case we can just do a quick calculation to see what tile our
+					** mouse is over and set that main.tiles index to a transparent/black texture
+					**/
+				}
+
+				main.draw();
 			}
 		}
 	},
@@ -261,8 +286,6 @@ var main = {
 			main.showGrid = false;
 			$('#toggle_grid').attr('checked', false);
 			main.loadGrid();
-			// Update Helper Block
-			main.helper_block.setSize(new Vector2(main.SQUARE, main.SQUARE));
 			// Update Viewport
 			main.camera.updateViewport();
 			main.draw();
@@ -294,7 +317,7 @@ var main = {
 		}
 	},
 	draw: function () {
-		var g;
+		var g, t;
 
 		main.context.clearRect(0, 0, main.VIEW_WIDTH, main.VIEW_HEIGHT);
 		main.camera.begin();
@@ -305,8 +328,9 @@ var main = {
 			}
 		}
 
-		if (main.show_helper_block)
-			main.helper_block.draw();
+		for (t = 0; t < main.tiles.length; t++) {
+			main.tiles[t].draw();
+		}
 
 		main.camera.end();
 	}
