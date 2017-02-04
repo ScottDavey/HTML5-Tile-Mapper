@@ -349,9 +349,9 @@ var main = {
 				that = $(this);
 				type = that.data("action");
 
-				if () {
+				// if () {
 
-				}
+				// }
 			},
 			load: {
 				init: function () {
