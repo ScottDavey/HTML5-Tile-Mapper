@@ -193,8 +193,9 @@ var main = {
 		this.camera 			= new Camera();
 		this.showGrid			= false;
 		this.grid 				= [];
-		this.tiles				= [];
-		this.selected_tool		= 'DRAW';
+		this.tile_arr			= [];
+		this.selected_tool		= 'draw';
+		this.isMouseDown		= false;
 
 		viewport = $('#viewport');
 
@@ -207,6 +208,7 @@ var main = {
 		this.canvas.addEventListener('mouseover', function (e) { main.input.mouse.onCanvasHover(); }, false);
 		this.canvas.addEventListener('mousemove', function (e) { main.input.mouse.onMouseMove(e); }, false);
 		this.canvas.addEventListener('mousedown', function (e) { main.input.mouse.onMouseDown(e); }, false);
+		this.canvas.addEventListener('mouseup', function (e) { main.input.mouse.onMouseUp(e); }, false);
 		//this.canvas.addEventListener('mouseover', function (e) { main.input.mouse.onCanvasHover }, false);
 
 		main.initialize();
@@ -220,37 +222,33 @@ var main = {
 				var viewport;
 				viewport = $('#viewport');
 				viewport.removeClass('draw').removeClass('erase').removeClass('move');
-				viewport.addClass(main.selected_tool.toLowerCase());
+				viewport.addClass(main.selected_tool);
 			},
 			onMouseMove: function (e) {
 				var tool, mouseX, mouseY;
+
+				mouseX = e.offsetX;
+				mouseY = e.offsetY;
+
+				if (main.isMouseDown) {
+					main.tiles.update(mouseX, mouseY);
+				}
 				
 			},
 			onMouseDown: function (e) {
-				var mouseButton, mouseX, mouseY;
+				var mouseButton, mouseX, mouseY, x, y, tile_type;
 				mouseButton = e.button;
-				mouseX		= e.offsetX;
-				mouseY		= e.offsetY;
 
-				// NEED TO FIGURE OUT how to check if mouse remains down - like using a while loop or something.
+				main.isMouseDown = true;
 
-				if (main.selected_tool === 'DRAW') {
-					/* 
-					** WHAT I SHOULD DO: Build the main.tiles array with transparent/black textures
-					** Then, with a quick calculation check what tile the mouse cursor is
-					** hovering over and set that array index as a texture object. This 
-					** will avoid adding more textures than the grid can hold (or stacking
-					** textures) 
-					**/
-					main.tiles.push(new Texture(new Vector2(mouseX, mouseY), new Vector2(main.SQUARE, main.SQUARE), '#FFFFFF', 0, 'transparent'));				
-				} else if (main.selected_tool === 'ERASE') {
-					/* 
-					** In this case we can just do a quick calculation to see what tile our
-					** mouse is over and set that main.tiles index to a transparent/black texture
-					**/
-				}
+				mouseX = e.offsetX;
+				mouseY = e.offsetY;
 
-				main.draw();
+				main.tiles.update(mouseX, mouseY);
+
+			},
+			onMouseUp: function (e) {
+				main.isMouseDown = false;
 			}
 		}
 	},
@@ -265,6 +263,37 @@ var main = {
 				this.grid.push(new Texture(new Vector2(x * main.SQUARE, y * main.SQUARE), new Vector2(main.SQUARE, main.SQUARE), 'transparent', 1, '#111111'));
 			}
 
+		}
+	},
+	tiles: {
+		reset: function () {
+			var x, y;
+
+			main.tile_arr = [];
+
+			for (y = 0; y < main.WORLD_HEIGHT / main.SQUARE; y++) {
+				main.tile_arr.push([]);
+				for (x = 0; x < main.WORLD_WIDTH / main.SQUARE; x++) {
+					main.tile_arr[y].push(new Texture(new Vector2(x * main.SQUARE, y * main.SQUARE), new Vector2(main.SQUARE, main.SQUARE), '#000000', 1, '#000000'));
+				}
+			}
+
+		},
+		update: function (mouseX, mouseY) {
+			var color, x, y, tile_type;
+
+			x = (Math.floor(mouseX / main.SQUARE) * main.SQUARE / main.SQUARE);
+			y = (Math.floor(mouseY / main.SQUARE) * main.SQUARE / main.SQUARE);
+
+			if (main.selected_tool === 'draw') {
+				tile_type = '#FFFFFF';
+			} else if (main.selected_tool === 'erase') {
+				tile_type = '#000000';
+			}
+
+			main.tile_arr[y][x] = new Texture(new Vector2(x * main.SQUARE, y * main.SQUARE), new Vector2(main.SQUARE, main.SQUARE), tile_type, 0, tile_type);
+
+			main.draw();
 		}
 	},
 	buttons: {
@@ -286,6 +315,8 @@ var main = {
 			main.showGrid = false;
 			$('#toggle_grid').attr('checked', false);
 			main.loadGrid();
+			// Reset tiles
+			main.tiles.reset();
 			// Update Viewport
 			main.camera.updateViewport();
 			main.draw();
@@ -304,7 +335,7 @@ var main = {
 			that = $(this);
 			type = that.val();
 
-			if (type === 'GRID') {
+			if (type === 'grid') {
 				main.showGrid = (main.showGrid) ? false : true;
 			}
 
@@ -312,25 +343,51 @@ var main = {
 			main.draw();
 
 		},
-		actions: function () {
-			console.log($(this));	
+		actions: {
+			init: function () {
+				var that, type;
+				that = $(this);
+				type = that.data("action");
+
+				if () {
+
+				}
+			},
+			load: {
+				init: function () {
+
+				},
+				apply: function () {
+
+				}
+			},
+			export: function () {
+
+			},
+			reset: function () {
+				main.tiles.reset();
+			}
+
 		}
 	},
 	draw: function () {
-		var g, t;
+		var g, x, y;
 
 		main.context.clearRect(0, 0, main.VIEW_WIDTH, main.VIEW_HEIGHT);
 		main.camera.begin();
 
+		for (y = 0; y < main.tile_arr.length; y++) {
+			for (x = 0; x < main.tile_arr[y].length; x++) {
+				main.tile_arr[y][x].draw();
+			}
+		}
+		
 		if (main.showGrid) {
 			for (g = 0; g < main.grid.length; g++) {
 				main.grid[g].draw();
 			}
 		}
 
-		for (t = 0; t < main.tiles.length; t++) {
-			main.tiles[t].draw();
-		}
 
 		main.camera.end();
 	}
