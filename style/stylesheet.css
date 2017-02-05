@@ -48,6 +48,18 @@ html, body { background-color:#212121; font:normal 14pt Raleway, "Century Gothic
 .bump.right9  { left: 9px; }
 .bump.right10 { left:10px; }
 
+/*  DIALOG  */
+#dialogOverlay { width:100%; height:100%; background-color:#000000; opacity:0.6; position:absolute; top:0px; left:0px; display:none; }
+#dialog { width:850px; height:400px; background-color:#000000; border:2px solid #000000; border-radius:10px; position:absolute; top:50%; left:50%; margin-top:-200px; margin-left:-425px; display:none; }
+#dialog #dialogHeader { width:800px; padding:13px 25px; background-color:#F11B2B; color:#000000; border-radius:8px 8px 0px 0px; font-size:14pt; font-weight:bold; }
+#dialog #dialogContent { width:850px; height:300px; padding:2px 0px; }
+#dialog #dialogContent #dialogTextarea { width:837px; height:288px; padding:5px; }
+#dialog #dialogFooter { width:850px; height:47px; background-color:#333333; border-radius:0px 0px 8px 8px; }
+#dialog #dialogFooter .button { width:100px; margin:2px 2px 0px 2px; padding:11px 0px; color:#000000; text-align:center; float:right; cursor:pointer; }
+#dialog #dialogFooter .button.save { background-color:#F11B2B; }
+#dialog #dialogFooter .button.close { background-color:#CCCCCC; border-radius:0px 0px 6px 0px; }
+
+/*  SIDEBAR  */
 #sidebar { width:200px; height:100%; padding-top:50px; box-sizing:border-box; box-shadow:0px 0px 5px #000000; float:left; }
 #sidebar h1 { font-size:20pt; font-weight:normal; text-align:center; margin-bottom:20px; }
 #sidebar h3 { font:normal 18pt Lobster, "Century Gothic", Verdana, sans-serif; margin-bottom:10px; color:#14FFEC; }
@@ -77,10 +89,11 @@ html, body { background-color:#212121; font:normal 14pt Raleway, "Century Gothic
 #sidebar #actions .action.red { background-color:#C51B20; }
 #sidebar #actions .action.red:hover { background-color:#E01F25; }
 
+/* CONTENT */
 #content { height:100%; float:left; }
 #content #viewport { background-color:#000000; margin:10px 0px 0px 10px; }
-#content #viewport.draw:hover { cursor: url("../cursors/cursor_draw.png"), default; }
-#content #viewport.erase:hover { cursor: url("../cursors/cursor_erase.png"), default; }
+#content #viewport.draw:hover { cursor: url("../cursors/custom_cursor.png"), default; }
+#content #viewport.erase:hover { cursor: url("../cursors/custom_cursor.png"), default; }
 #content #viewport.move:hover { cursor:move; }
 
 /** CLEARFIX for floated elements */

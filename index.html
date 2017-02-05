@@ -9,6 +9,20 @@
 </head>
 <body onload="main.init();">
 
+	<!-- DIALOG -->
+	<div id="dialogOverlay">&nbsp;</div>
+	<div id="dialog">
+		<div id="dialogHeader">EXPORT</div>
+		<div id="dialogContent">
+			<textarea id="dialogTextarea"></textarea>
+		</div>
+		<div id="dialogFooter" class="cf">
+			<div class="button close" id="dialogCloseBtn">CLOSE</div>
+			<div class="button save" id="dialogSaveBtn">LOAD</div>
+		</div>
+	</div>
+
+	<!-- SIDEBAR -->
 	<div id="sidebar">
 		
 		<h1>TOOL BAR</h1>
@@ -42,8 +56,9 @@
 
 	</div>
 
+	<!-- CONTENT -->
 	<div id="content">		
-		<canvas id="viewport"></canvas>
+		<canvas id="viewport" oncontextmenu="return false"></canvas>
 	</div>
 
 </body>

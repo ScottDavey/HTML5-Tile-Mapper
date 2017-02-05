@@ -191,11 +191,11 @@ var main = {
 		this.canvas 			= document.getElementById('viewport');
 		this.context 			= this.canvas.getContext('2d');
 		this.camera 			= new Camera();
-		this.showGrid			= false;
+		this.showGrid			= true;
 		this.grid 				= [];
 		this.tile_arr			= [];
 		this.selected_tool		= 'draw';
-		this.isMouseDown		= false;
+		this.mouseDownButton	= -1;
 
 		viewport = $('#viewport');
 
@@ -204,7 +204,7 @@ var main = {
 		$('#apply_btn').on('click', main.buttons.apply);
 		$('.tool').on('click', main.buttons.tools);
 		$('.setting').on('click', main.buttons.settings);
-		$('.action').on('click', main.buttons.actions);
+		$('.action').on('click', main.buttons.actions.init);
 		this.canvas.addEventListener('mouseover', function (e) { main.input.mouse.onCanvasHover(); }, false);
 		this.canvas.addEventListener('mousemove', function (e) { main.input.mouse.onMouseMove(e); }, false);
 		this.canvas.addEventListener('mousedown', function (e) { main.input.mouse.onMouseDown(e); }, false);
@@ -230,7 +230,7 @@ var main = {
 				mouseX = e.offsetX;
 				mouseY = e.offsetY;
 
-				if (main.isMouseDown) {
+				if (main.mouseDownButton !== -1) {
 					main.tiles.update(mouseX, mouseY);
 				}
 				
@@ -239,7 +239,7 @@ var main = {
 				var mouseButton, mouseX, mouseY, x, y, tile_type;
 				mouseButton = e.button;
 
-				main.isMouseDown = true;
+				main.mouseDownButton = mouseButton;
 
 				mouseX = e.offsetX;
 				mouseY = e.offsetY;
@@ -248,7 +248,7 @@ var main = {
 
 			},
 			onMouseUp: function (e) {
-				main.isMouseDown = false;
+				main.mouseDownButton = -1;
 			}
 		}
 	},
@@ -285,9 +285,11 @@ var main = {
 			x = (Math.floor(mouseX / main.SQUARE) * main.SQUARE / main.SQUARE);
 			y = (Math.floor(mouseY / main.SQUARE) * main.SQUARE / main.SQUARE);
 
-			if (main.selected_tool === 'draw') {
+			//if (main.selected_tool === 'draw') {
+			if (main.mouseDownButton === 0) {
 				tile_type = '#FFFFFF';
-			} else if (main.selected_tool === 'erase') {
+			// } else if (main.selected_tool === 'erase') {
+			} else if (main.mouseDownButton === 2) {
 				tile_type = '#000000';
 			}
 
@@ -312,8 +314,8 @@ var main = {
 			main.canvas.width 		= main.VIEW_WIDTH;
 			main.canvas.height 		= main.VIEW_HEIGHT;
 			// Reset Grid Settings
-			main.showGrid = false;
-			$('#toggle_grid').attr('checked', false);
+			main.showGrid = true;
+			$('#toggle_grid').attr('checked', true);
 			main.loadGrid();
 			// Reset tiles
 			main.tiles.reset();
@@ -347,11 +349,13 @@ var main = {
 			init: function () {
 				var that, type;
 				that = $(this);
-				type = that.data("action");
+				type = that.data('action');
 
-				// if () {
-
-				// }
+				if (type === 'load') {
+					main.buttons.actions.load.init();
+				} else if (type === 'export') {
+					main.buttons.actions.export();
+				}
 			},
 			load: {
 				init: function () {
@@ -362,12 +366,55 @@ var main = {
 				}
 			},
 			export: function () {
+				var x, y, newarr = [], stringified = '';
 
+				stringified = JSON.stringify(main.tile_arr, ['pos', 'x', 'y', 'fillColor']);
+
+				main.dialog.show({title: 'EXPORT', content: stringified, showSave: false});
 			},
 			reset: function () {
 				main.tiles.reset();
 			}
 
+		}
+	},
+	dialog: {
+		show: function (data) {
+			var dialog, headerArea, contentArea, saveBtn, cancelBtn, overlay, title, content, showSaveBtn;
+
+			dialog			= $('#dialog');
+			headerArea		= $('#dialogHeader');
+			contentArea		= $('#dialogTextarea');
+			saveBtn			= $('#dialogSaveBtn');
+			closeBtn		= $('#dialogCloseBtn');
+			overlay			= $('#dialogOverlay');
+			title			= (typeof data.title === 'undefined') ? 'DIALOG' : data.title;
+			content			= (typeof data.content === 'undefined') ? '' : data.content;
+			showSave		= (typeof data.showSave === 'undefined') ? false : data.showSave;
+
+			if (showSave) {
+				saveBtn.on('click', main.load.save);
+				saveBtn.show();
+			} else {
+				saveBtn.hide();
+			}
+
+			headerArea.text(title);
+			contentArea.val(content);
+
+			closeBtn.on('click', main.dialog.close);
+			dialog.fadeIn(200);
+			overlay.fadeIn(200);
+		},
+		load: function () {
+			main.dialog.show({title: 'LOAD', showSave: true});
+		},
+		save: function () {
+
+		},
+		close: function () {
+			$('#dialog').fadeOut(200);
+			$('#dialogOverlay').fadeOut(200);
 		}
 	},
 	draw: function () {
