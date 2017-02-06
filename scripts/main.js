@@ -62,12 +62,13 @@ Line.prototype.draw = function () {
 /**************************
 *****  TEXTURE CLASS  *****
 **************************/
-function Texture (pos, size, fillColor, lineWidth, lineColor)  {
+function Texture (pos, size, fillColor, lineWidth, lineColor, type)  {
 	this.pos		= pos;
 	this.size		= size;
 	this.fillColor	= fillColor;
 	this.lineWidth 	= lineWidth;
 	this.lineColor	= lineColor;
+	this.type 		= (typeof type === 'undefined') ? 'normal' : type;
 }
 
 Texture.prototype.update = function (pos) {
@@ -194,7 +195,7 @@ var main = {
 		this.showGrid			= true;
 		this.grid 				= [];
 		this.tile_arr			= [];
-		this.selected_tool		= 'draw';
+		this.selected_tool		= 'normal';
 		this.mouseDownButton	= -1;
 
 		viewport = $('#viewport');
@@ -209,7 +210,6 @@ var main = {
 		this.canvas.addEventListener('mousemove', function (e) { main.input.mouse.onMouseMove(e); }, false);
 		this.canvas.addEventListener('mousedown', function (e) { main.input.mouse.onMouseDown(e); }, false);
 		this.canvas.addEventListener('mouseup', function (e) { main.input.mouse.onMouseUp(e); }, false);
-		//this.canvas.addEventListener('mouseover', function (e) { main.input.mouse.onCanvasHover }, false);
 
 		main.initialize();
 	},
@@ -278,6 +278,8 @@ var main = {
 				}
 			}
 
+			main.draw();
+
 		},
 		update: function (mouseX, mouseY) {
 			var color, x, y, tile_type;
@@ -285,10 +287,14 @@ var main = {
 			x = (Math.floor(mouseX / main.SQUARE) * main.SQUARE / main.SQUARE);
 			y = (Math.floor(mouseY / main.SQUARE) * main.SQUARE / main.SQUARE);
 
-			//if (main.selected_tool === 'draw') {
 			if (main.mouseDownButton === 0) {
-				tile_type = '#FFFFFF';
-			// } else if (main.selected_tool === 'erase') {
+				if (main.selected_tool === 'normal') {
+					tile_type = '#777777';
+				} else if (main.selected_tool === 'start') {
+					tile_type = '#14EB51';
+				} else {
+					tile_type = '#C51B20';
+				}
 			} else if (main.mouseDownButton === 2) {
 				tile_type = '#000000';
 			}
@@ -352,23 +358,20 @@ var main = {
 				type = that.data('action');
 
 				if (type === 'load') {
-					main.buttons.actions.load.init();
+					main.buttons.actions.load();
 				} else if (type === 'export') {
 					main.buttons.actions.export();
+				} else if (type === 'reset') {
+					main.buttons.actions.reset();
 				}
 			},
-			load: {
-				init: function () {
-
-				},
-				apply: function () {
-
-				}
+			load: function () {
+				main.dialog.show({title: 'LOAD', showSave: true});
 			},
 			export: function () {
 				var x, y, newarr = [], stringified = '';
 
-				stringified = JSON.stringify(main.tile_arr, ['pos', 'x', 'y', 'fillColor']);
+				stringified = JSON.stringify(main.tile_arr, ['size', 'x', 'fillColor']);
 
 				main.dialog.show({title: 'EXPORT', content: stringified, showSave: false});
 			},
@@ -393,7 +396,7 @@ var main = {
 			showSave		= (typeof data.showSave === 'undefined') ? false : data.showSave;
 
 			if (showSave) {
-				saveBtn.on('click', main.load.save);
+				saveBtn.on('click', main.dialog.save);
 				saveBtn.show();
 			} else {
 				saveBtn.hide();
@@ -406,10 +409,39 @@ var main = {
 			dialog.fadeIn(200);
 			overlay.fadeIn(200);
 		},
-		load: function () {
-			main.dialog.show({title: 'LOAD', showSave: true});
-		},
 		save: function () {
+			var content, val, newarr, square, world_width, world_height, x, y, pos, size;
+			content = $('#dialogTextarea');
+			val = content.val();
+
+			if (val.length > 0) {
+				newarr = JSON.parse(val);
+			} else {
+				content.css('background-color', '#FF9999');
+			}
+
+			square 		= newarr[0][0].size.x;
+			size 		= new Vector2(square, square);
+			world_width = newarr[0].length * square;
+			world_height = newarr.length * square;
+
+			main.WORLD_WIDTH = world_width;
+			main.WORLD_HEIGHT = world_height;
+			main.SQUARE = square;
+			$('#canvas_width').val(main.WORLD_WIDTH);
+			$('#canvas_height').val(main.WORLD_HEIGHT);
+			$('#square_size').val(main.SQUARE);
+			main.buttons.apply();
+
+			for (y = 0; y < newarr.length; y++) {
+				for (x = 0; x < newarr[y].length; x++) {
+					pos = new Vector2(square * x, square * y);
+					main.tile_arr[y][x] = new Texture(pos, size, newarr[y][x].fillColor, 1, newarr[y][x].fillColor);
+				}
+			}
+
+			main.draw();
+			main.dialog.close();
 
 		},
 		close: function () {
