@@ -193,14 +193,15 @@ var main = {
 		this.jCanvas			= $('#viewport');
 		this.context 			= this.canvas.getContext('2d');
 		this.camera 			= new Camera();
+		main.cameraPos			= new Vector2(0, 0);
 		this.showGrid			= true;
 		this.grid 				= [];
 		this.tile_arr			= [];
 		this.selected_tool		= 'normal';
 		this.mouseDownButton	= -1;
 		this.isSpaceDown		= false;
+		main.previousMousePos	= new Vector2(0,0);
 		main.mouseCursor		= '../cursors/custom_cursor.png';
-		
 
 		// Event Handlers
 		$(window).on('resize', main.buttons.apply);
@@ -218,6 +219,7 @@ var main = {
 	},
 	initialize: function () {
 		main.buttons.apply();
+		main.camera.moveTo(main.cameraPos);
 	},
 	input: {
 		key: {
@@ -236,16 +238,26 @@ var main = {
 		},
 		mouse: {
 			onMouseMove: function (e) {
-				var tool, mouseX, mouseY;
+				var tool, mouseX, mouseY, mouseXDiff, mouseYDiff;
 
 				mouseX = e.offsetX;
 				mouseY = e.offsetY;
 
+				console.log(main.isSpaceDown, main.mouseDownButton);
+
 				if (main.isSpaceDown && main.mouseDownButton === 0) {
-					// Move the canvas
+					
+					mouseXDiff = mouseX - main.previousMousePos.x;
+					mouseYDiff = mouseY - main.previousMousePos.y;
+					main.cameraPos = new Vector2(mouseXDiff, mouseYDiff);
+					console.log(mouseXDiff, mouseYDiff);
+					main.camera.moveTo(main.cameraPos);
+
 				} else if (main.mouseDownButton !== -1) {
 					main.tiles.update(mouseX, mouseY);
 				}
+
+				main.previousMousePos = new Vector2(mouseX, mouseY);
 				
 			},
 			onMouseDown: function (e) {
