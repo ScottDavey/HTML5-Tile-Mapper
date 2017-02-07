@@ -92,9 +92,6 @@ html, body { background-color:#212121; font:normal 14pt Raleway, "Century Gothic
 /* CONTENT */
 #content { height:100%; float:left; }
 #content #viewport { background-color:#000000; margin:10px 0px 0px 10px; }
-#content #viewport.draw:hover { cursor: url("../cursors/custom_cursor.png"), default; }
-#content #viewport.erase:hover { cursor: url("../cursors/custom_cursor.png"), default; }
-#content #viewport.move:hover { cursor:move; }
 
 /** CLEARFIX for floated elements */
 .cf:before, .cf:after { content:""; display:table; } /* For modern browsers */

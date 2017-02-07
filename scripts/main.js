@@ -190,6 +190,7 @@ var main = {
 		this.VIEW_HEIGHT		= 0;
 		this.SQUARE				= $('#square_size').val();
 		this.canvas 			= document.getElementById('viewport');
+		this.jCanvas			= $('#viewport');
 		this.context 			= this.canvas.getContext('2d');
 		this.camera 			= new Camera();
 		this.showGrid			= true;
@@ -197,8 +198,9 @@ var main = {
 		this.tile_arr			= [];
 		this.selected_tool		= 'normal';
 		this.mouseDownButton	= -1;
-
-		viewport = $('#viewport');
+		this.isSpaceDown		= false;
+		main.mouseCursor		= '../cursors/custom_cursor.png';
+		
 
 		// Event Handlers
 		$(window).on('resize', main.buttons.apply);
@@ -206,10 +208,11 @@ var main = {
 		$('.tool').on('click', main.buttons.tools);
 		$('.setting').on('click', main.buttons.settings);
 		$('.action').on('click', main.buttons.actions.init);
-		this.canvas.addEventListener('mouseover', function (e) { main.input.mouse.onCanvasHover(); }, false);
 		this.canvas.addEventListener('mousemove', function (e) { main.input.mouse.onMouseMove(e); }, false);
 		this.canvas.addEventListener('mousedown', function (e) { main.input.mouse.onMouseDown(e); }, false);
 		this.canvas.addEventListener('mouseup', function (e) { main.input.mouse.onMouseUp(e); }, false);
+		document.addEventListener('keydown', function (e) { main.input.key.onKeyDown(e); }, false);
+		document.addEventListener('keyup', function (e) { main.input.key.onKeyUp(e); }, false);
 
 		main.initialize();
 	},
@@ -217,20 +220,30 @@ var main = {
 		main.buttons.apply();
 	},
 	input: {
-		mouse: {
-			onCanvasHover: function () {
-				var viewport;
-				viewport = $('#viewport');
-				viewport.removeClass('draw').removeClass('erase').removeClass('move');
-				viewport.addClass(main.selected_tool);
+		key: {
+			onKeyDown: function (e) {
+				if (e.code === 'Space') {
+					main.isSpaceDown = true;
+					main.jCanvas.addClass('move');
+				}
 			},
+			onKeyUp: function (e) {
+				if (e.code === 'Space') {
+					main.isSpaceDown = false;
+					main.jCanvas.removeClass('move');
+				}
+			}
+		},
+		mouse: {
 			onMouseMove: function (e) {
 				var tool, mouseX, mouseY;
 
 				mouseX = e.offsetX;
 				mouseY = e.offsetY;
 
-				if (main.mouseDownButton !== -1) {
+				if (main.isSpaceDown && main.mouseDownButton === 0) {
+					// Move the canvas
+				} else if (main.mouseDownButton !== -1) {
 					main.tiles.update(mouseX, mouseY);
 				}
 				
@@ -244,7 +257,9 @@ var main = {
 				mouseX = e.offsetX;
 				mouseY = e.offsetY;
 
-				main.tiles.update(mouseX, mouseY);
+				if (!main.isSpaceDown) {
+					main.tiles.update(mouseX, mouseY);
+				}
 
 			},
 			onMouseUp: function (e) {
@@ -306,10 +321,9 @@ var main = {
 	},
 	buttons: {
 		apply: function () {
-			var docWidth, docHeight, viewport, square;
+			var docWidth, docHeight, square;
 			docWidth  			= $(document).width() - 220;
 			docHeight 			= $(document).height() - 20;
-			viewport 			= $('#viewport');
 			// Reset dimensions
 			main.WORLD_WIDTH		= $('#canvas_width').val();
 			main.WORLD_HEIGHT		= $('#canvas_height').val();
