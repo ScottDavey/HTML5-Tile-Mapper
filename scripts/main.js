@@ -167,6 +167,7 @@ Camera.prototype = {
 		this.lookat[0] = x;
 		this.lookat[1] = y;
 		this.updateViewport();
+		main.draw();
 	},
 	screenToWorld: function (x, y, obj) {
 		obj = obj || {};
@@ -200,8 +201,7 @@ var main = {
 		this.selected_tool		= 'normal';
 		this.mouseDownButton	= -1;
 		this.isSpaceDown		= false;
-		main.previousMousePos	= new Vector2(0,0);
-		main.mouseCursor		= '../cursors/custom_cursor.png';
+		this.previousMousePos	= new Vector2(0, 0);
 
 		// Event Handlers
 		$(window).on('resize', main.buttons.apply);
@@ -219,7 +219,7 @@ var main = {
 	},
 	initialize: function () {
 		main.buttons.apply();
-		main.camera.moveTo(main.cameraPos);
+		main.camera.moveTo(main.cameraPos.x, main.cameraPos.y);
 	},
 	input: {
 		key: {
@@ -243,20 +243,36 @@ var main = {
 				mouseX = e.offsetX;
 				mouseY = e.offsetY;
 
-				console.log(main.isSpaceDown, main.mouseDownButton);
-
+				// If space bar is pressed and left mouse button is being clicked, pan the canvas
+				// else if any mouse button is pushed, update tiles
 				if (main.isSpaceDown && main.mouseDownButton === 0) {
 					
+					// Get the difference between current mouse position and previous
 					mouseXDiff = mouseX - main.previousMousePos.x;
 					mouseYDiff = mouseY - main.previousMousePos.y;
-					main.cameraPos = new Vector2(mouseXDiff, mouseYDiff);
-					console.log(mouseXDiff, mouseYDiff);
-					main.camera.moveTo(main.cameraPos);
+					// apply the difference to the camera position variable
+					main.cameraPos.x -= mouseXDiff;
+					main.cameraPos.y -= mouseYDiff;
+					
+					// Ensure camera panning doesn't go past world bounds
+					if (main.cameraPos.x <= 0)
+						main.cameraPos.x = 0;
+					else if ((main.cameraPos.x + main.VIEW_WIDTH) > main.WORLD_WIDTH)
+						main.cameraPos.x = main.WORLD_WIDTH - main.VIEW_WIDTH;
+
+					if (main.cameraPos.y <= 0)
+						main.cameraPos.y = 0;
+					else if ((main.cameraPos.y + main.VIEW_HEIGHT) > main.WORLD_HEIGHT)
+						main.cameraPos.y = main.WORLD_HEIGHT - main.VIEW_HEIGHT;
+
+					// update the camera (the Camera.moveTo function calls Camera.updateViewport where main.draw() is called)
+					main.camera.moveTo(main.cameraPos.x, main.cameraPos.y);
 
 				} else if (main.mouseDownButton !== -1) {
 					main.tiles.update(mouseX, mouseY);
 				}
 
+				// Capture the current mouse coordinates
 				main.previousMousePos = new Vector2(mouseX, mouseY);
 				
 			},
@@ -264,17 +280,21 @@ var main = {
 				var mouseButton, mouseX, mouseY, x, y, tile_type;
 				mouseButton = e.button;
 
+				// Capture which mouse button is being pressed
 				main.mouseDownButton = mouseButton;
 
+				// Capture mouse x/y coordinates
 				mouseX = e.offsetX;
 				mouseY = e.offsetY;
 
+				// Update tiles as long as the space bar isn't also being pressed
 				if (!main.isSpaceDown) {
 					main.tiles.update(mouseX, mouseY);
 				}
 
 			},
 			onMouseUp: function (e) {
+				// The mouse button has been released
 				main.mouseDownButton = -1;
 			}
 		}
@@ -311,10 +331,16 @@ var main = {
 		update: function (mouseX, mouseY) {
 			var color, x, y, tile_type;
 
-			x = (Math.floor(mouseX / main.SQUARE) * main.SQUARE / main.SQUARE);
-			y = (Math.floor(mouseY / main.SQUARE) * main.SQUARE / main.SQUARE);
+			// Correct the mouse positioning if the canvas has been panned
+			x = (mouseX + main.cameraPos.x);
+			y = (mouseY + main.cameraPos.y);
+			// Get the tile index for x and y
+			x = Math.floor(x / main.SQUARE);
+			y = Math.floor(y / main.SQUARE);
 
+			// If the left mouse button is pressed, we're adding a tile. If the right mouse button, we're erasing
 			if (main.mouseDownButton === 0) {
+				// Check what type of tile we're adding
 				if (main.selected_tool === 'normal') {
 					tile_type = '#777777';
 				} else if (main.selected_tool === 'start') {
@@ -476,22 +502,36 @@ var main = {
 		}
 	},
 	draw: function () {
-		var g, x, y;
+		var g, x, y, cTop, cLeft, cBottom, cRight;
+
+		// Calculate how much of the canvas is showing and only draw what we see.
+		cTop	= Math.floor(main.cameraPos.y / main.SQUARE);
+		cLeft	= Math.floor(main.cameraPos.x  / main.SQUARE);
+		cBottom = Math.floor((main.cameraPos.y + main.VIEW_HEIGHT) / main.SQUARE);
+		cRight	= Math.floor((main.cameraPos.x + main.VIEW_WIDTH) / main.SQUARE);
+		// Make sure we stay within the tile array bounds
+		cTop	= (cTop < 0) ? 0 : cTop;
+		cLeft	= (cLeft < 0) ? 0 : cLeft;
+		cBottom = (cBottom > (main.tile_arr.length - 1)) ? main.tile_arr.length - 1 : cBottom;
+		cRight	= (cRight > (main.tile_arr[0].length - 1)) ? main.tile_arr[0].length - 1 : cRight;
 
 		main.context.clearRect(0, 0, main.VIEW_WIDTH, main.VIEW_HEIGHT);
 		main.camera.begin();
 
-		for (y = 0; y < main.tile_arr.length; y++) {
-			for (x = 0; x < main.tile_arr[y].length; x++) {
+		// Draw Tiles
+		for (y = cTop; y <= cBottom; y++) {
+			for (x = cLeft; x <= cRight; x++) {
 				main.tile_arr[y][x].draw();
 			}
 		}
 		
+		// Draw grid
 		if (main.showGrid) {
 			for (g = 0; g < main.grid.length; g++) {
 				main.grid[g].draw();
 			}
 		}
+		
 
 
 		main.camera.end();

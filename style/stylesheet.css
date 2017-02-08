@@ -78,7 +78,7 @@ html, body { background-color:#212121; font:normal 14pt Raleway, "Century Gothic
 #sidebar #settings .row .setting.checkbox { width:30px; height:30px; }
 
 #sidebar #toolset {  }
-#sidebar #toolset .tool { width:50px; padding:5px 0px; margin:0px 1px 20px 0px; float:left; }
+#sidebar #toolset #tile_type .tool { width:50px; padding:5px 0px; margin:0px 1px 20px 0px; float:left; }
 
 #sidebar #actions {  }
 #sidebar #actions .action { width:100%; padding:5px 0px; margin-bottom:5px; }
