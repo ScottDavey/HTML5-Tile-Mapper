@@ -71,8 +71,9 @@ function Texture (pos, size, fillColor, lineWidth, lineColor, type)  {
 	this.type 		= (typeof type === 'undefined') ? 'normal' : type;
 }
 
-Texture.prototype.update = function (pos) {
-	this.pos = pos;
+Texture.prototype.update = function (fillColor, type) {
+	this.fillColor = fillColor;
+	this.type = type;
 };
 
 Texture.prototype.setSize = function (size) {
@@ -321,7 +322,7 @@ var main = {
 			for (y = 0; y < main.WORLD_HEIGHT / main.SQUARE; y++) {
 				main.tile_arr.push([]);
 				for (x = 0; x < main.WORLD_WIDTH / main.SQUARE; x++) {
-					main.tile_arr[y].push(new Texture(new Vector2(x * main.SQUARE, y * main.SQUARE), new Vector2(main.SQUARE, main.SQUARE), '#000000', 1, '#000000'));
+					main.tile_arr[y].push(new Texture(new Vector2(x * main.SQUARE, y * main.SQUARE), new Vector2(main.SQUARE, main.SQUARE), '#000000', 1, '#000000', 'wall'));
 				}
 			}
 
@@ -329,7 +330,7 @@ var main = {
 
 		},
 		update: function (mouseX, mouseY) {
-			var color, x, y, tile_type;
+			var x, y, fillColor, type;
 
 			// Correct the mouse positioning if the canvas has been panned
 			x = (mouseX + main.cameraPos.x);
@@ -342,18 +343,21 @@ var main = {
 			if (main.mouseDownButton === 0) {
 				// Check what type of tile we're adding
 				if (main.selected_tool === 'normal') {
-					tile_type = '#777777';
+					fillColor = '#777777';
+					type = 'normal';
 				} else if (main.selected_tool === 'start') {
-					tile_type = '#14EB51';
+					fillColor = '#14EB51';
+					type = 'start';
 				} else {
-					tile_type = '#C51B20';
+					fillColor = '#C51B20';
+					type = 'exit';
 				}
 			} else if (main.mouseDownButton === 2) {
-				tile_type = '#000000';
+				fillColor = '#000000';
+				type = 'wall';
 			}
 
-			main.tile_arr[y][x] = new Texture(new Vector2(x * main.SQUARE, y * main.SQUARE), new Vector2(main.SQUARE, main.SQUARE), tile_type, 0, tile_type);
-
+			main.tile_arr[y][x].update(fillColor, type);
 			main.draw();
 		}
 	},
@@ -423,7 +427,14 @@ var main = {
 			export: function () {
 				var x, y, newarr = [], stringified = '';
 
-				stringified = JSON.stringify(main.tile_arr, ['size', 'x', 'fillColor']);
+				for (y = 0; y < main.tile_arr.length; y++) {
+					newarr.push([]);
+					for (x = 0; x < main.tile_arr[y].length; x++) {
+						newarr[y].push({s: main.tile_arr[y][x].size.x, t: main.tile_arr[y][x].type});
+					}
+				}
+
+				stringified = JSON.stringify(newarr);
 
 				main.dialog.show({title: 'EXPORT', content: stringified, showSave: false});
 			},
@@ -462,38 +473,48 @@ var main = {
 			overlay.fadeIn(200);
 		},
 		save: function () {
-			var content, val, newarr, square, world_width, world_height, x, y, pos, size;
+			var content, val, newarr, square, world_width, world_height, x, y, pos, size, fillColor;
 			content = $('#dialogTextarea');
 			val = content.val();
 
-			if (val.length > 0) {
-				newarr = JSON.parse(val);
-			} else {
+			if (val.length === 0) {
 				content.css('background-color', '#FF9999');
-			}
+			} else {
+				newarr = JSON.parse(val);
 
-			square 		= newarr[0][0].size.x;
-			size 		= new Vector2(square, square);
-			world_width = newarr[0].length * square;
-			world_height = newarr.length * square;
+				square 		= newarr[0][0].s;
+				size 		= new Vector2(square, square);
+				world_width = newarr[0].length * square;
+				world_height = newarr.length * square;
 
-			main.WORLD_WIDTH = world_width;
-			main.WORLD_HEIGHT = world_height;
-			main.SQUARE = square;
-			$('#canvas_width').val(main.WORLD_WIDTH);
-			$('#canvas_height').val(main.WORLD_HEIGHT);
-			$('#square_size').val(main.SQUARE);
-			main.buttons.apply();
+				main.WORLD_WIDTH = world_width;
+				main.WORLD_HEIGHT = world_height;
+				main.SQUARE = square;
+				$('#canvas_width').val(main.WORLD_WIDTH);
+				$('#canvas_height').val(main.WORLD_HEIGHT);
+				$('#square_size').val(main.SQUARE);
+				main.buttons.apply();
 
-			for (y = 0; y < newarr.length; y++) {
-				for (x = 0; x < newarr[y].length; x++) {
-					pos = new Vector2(square * x, square * y);
-					main.tile_arr[y][x] = new Texture(pos, size, newarr[y][x].fillColor, 1, newarr[y][x].fillColor);
+				for (y = 0; y < newarr.length; y++) {
+					for (x = 0; x < newarr[y].length; x++) {
+						pos = new Vector2(square * x, square * y);
+						if (newarr[y][x].t === 'normal') {
+							fillColor = '#777777';
+						} else if (newarr[y][x].t === 'start') {
+							fillColor = '#14EB51';
+						} else if (newarr[y][x].t === 'exit') {
+							fillColor = '#C51B20';
+						} else {
+							fillColor = '#000000';
+						}
+						main.tile_arr[y][x] = new Texture(pos, size, fillColor, 1, fillColor, newarr[y][x].t);
+					}
 				}
-			}
 
-			main.draw();
-			main.dialog.close();
+				main.draw();
+				main.dialog.close();
+
+			}
 
 		},
 		close: function () {
