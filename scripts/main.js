@@ -66,8 +66,8 @@ function Texture (pos, size, fillColor, lineWidth, lineColor, type)  {
 	this.pos		= pos;
 	this.size		= size;
 	this.fillColor	= fillColor;
-	this.lineWidth 	= lineWidth;
-	this.lineColor	= lineColor;
+	this.lineWidth 	= (typeof lineWidth === 'undefined') ? 1 : lineWidth;
+	this.lineColor	= (typeof lineColor === 'undefined') ? '#111111' : lineColor;
 	this.type 		= (typeof type === 'undefined') ? 'normal' : type;
 }
 
@@ -168,7 +168,7 @@ Camera.prototype = {
 		this.lookat[0] = x;
 		this.lookat[1] = y;
 		this.updateViewport();
-		main.draw();
+		main.draw.all();
 	},
 	screenToWorld: function (x, y, obj) {
 		obj = obj || {};
@@ -208,7 +208,6 @@ var main = {
 		$(window).on('resize', main.buttons.apply);
 		$('#apply_btn').on('click', main.buttons.apply);
 		$('.tool').on('click', main.buttons.tools);
-		$('.setting').on('click', main.buttons.settings);
 		$('.action').on('click', main.buttons.actions.init);
 		this.canvas.addEventListener('mousemove', function (e) { main.input.mouse.onMouseMove(e); }, false);
 		this.canvas.addEventListener('mousedown', function (e) { main.input.mouse.onMouseDown(e); }, false);
@@ -300,19 +299,6 @@ var main = {
 			}
 		}
 	},
-	loadGrid: function () {
-		var x, y;
-
-		// RESET
-		main.grid = [];
-		// BUILD
-		for (y = 0; y < Math.ceil(main.WORLD_HEIGHT / main.SQUARE); y++) {
-			for (x = 0; x < Math.ceil(main.WORLD_WIDTH / main.SQUARE); x++) {
-				this.grid.push(new Texture(new Vector2(x * main.SQUARE, y * main.SQUARE), new Vector2(main.SQUARE, main.SQUARE), 'transparent', 1, '#111111'));
-			}
-
-		}
-	},
 	tiles: {
 		reset: function () {
 			var x, y;
@@ -322,11 +308,11 @@ var main = {
 			for (y = 0; y < main.WORLD_HEIGHT / main.SQUARE; y++) {
 				main.tile_arr.push([]);
 				for (x = 0; x < main.WORLD_WIDTH / main.SQUARE; x++) {
-					main.tile_arr[y].push(new Texture(new Vector2(x * main.SQUARE, y * main.SQUARE), new Vector2(main.SQUARE, main.SQUARE), '#000000', 1, '#000000', 'wall'));
+					main.tile_arr[y].push(new Texture(new Vector2(x * main.SQUARE, y * main.SQUARE), new Vector2(main.SQUARE, main.SQUARE), '#000000', 1, '#111111', 'wall'));
 				}
 			}
 
-			main.draw();
+			main.draw.all();
 
 		},
 		update: function (mouseX, mouseY) {
@@ -339,7 +325,7 @@ var main = {
 			x = Math.floor(x / main.SQUARE);
 			y = Math.floor(y / main.SQUARE);
 
-			// If the left mouse button is pressed, we're adding a tile. If the right mouse button, we're erasing
+			// If the left mouse button is pressed, we're adding a tile. Else If the right mouse button, we're erasing
 			if (main.mouseDownButton === 0) {
 				// Check what type of tile we're adding
 				if (main.selected_tool === 'normal') {
@@ -358,7 +344,7 @@ var main = {
 			}
 
 			main.tile_arr[y][x].update(fillColor, type);
-			main.draw();
+			main.draw.tile(x, y, main.SQUARE, main.SQUARE);
 		}
 	},
 	buttons: {
@@ -375,15 +361,11 @@ var main = {
 			// Apply dimensions
 			main.canvas.width 		= main.VIEW_WIDTH;
 			main.canvas.height 		= main.VIEW_HEIGHT;
-			// Reset Grid Settings
-			main.showGrid = true;
-			$('#toggle_grid').attr('checked', true);
-			main.loadGrid();
 			// Reset tiles
 			main.tiles.reset();
 			// Update Viewport
 			main.camera.updateViewport();
-			main.draw();
+			main.draw.all();
 		},
 		tools: function () {
 			var that, type, tools;
@@ -393,19 +375,6 @@ var main = {
 			tools.removeClass('active');
 			that.addClass('active');
 			main.selected_tool = type;
-		},
-		settings: function () {
-			var that, type;
-			that = $(this);
-			type = that.val();
-
-			if (type === 'grid') {
-				main.showGrid = (main.showGrid) ? false : true;
-			}
-
-			// Refresh Canvas
-			main.draw();
-
 		},
 		actions: {
 			init: function () {
@@ -482,13 +451,13 @@ var main = {
 			} else {
 				newarr = JSON.parse(val);
 
-				square 		= newarr[0][0].s;
-				size 		= new Vector2(square, square);
-				world_width = newarr[0].length * square;
-				world_height = newarr.length * square;
+				square 		 		= newarr[0][0].s;
+				size 		 		= new Vector2(square, square);
+				world_width  		= newarr[0].length * square;
+				world_height 		= newarr.length * square;
 
-				main.WORLD_WIDTH = world_width;
-				main.WORLD_HEIGHT = world_height;
+				main.WORLD_WIDTH 	= world_width;
+				main.WORLD_HEIGHT 	= world_height;
 				main.SQUARE = square;
 				$('#canvas_width').val(main.WORLD_WIDTH);
 				$('#canvas_height').val(main.WORLD_HEIGHT);
@@ -507,11 +476,11 @@ var main = {
 						} else {
 							fillColor = '#000000';
 						}
-						main.tile_arr[y][x] = new Texture(pos, size, fillColor, 1, fillColor, newarr[y][x].t);
+						main.tile_arr[y][x] = new Texture(pos, size, fillColor, 1, '#111111', newarr[y][x].t);
 					}
 				}
 
-				main.draw();
+				main.draw.all();
 				main.dialog.close();
 
 			}
@@ -522,40 +491,46 @@ var main = {
 			$('#dialogOverlay').fadeOut(200);
 		}
 	},
-	draw: function () {
-		var g, x, y, cTop, cLeft, cBottom, cRight;
+	draw: {
+		all: function () {
+			var g, x, y, cTop, cLeft, cBottom, cRight;
 
-		// Calculate how much of the canvas is showing and only draw what we see.
-		cTop	= Math.floor(main.cameraPos.y / main.SQUARE);
-		cLeft	= Math.floor(main.cameraPos.x  / main.SQUARE);
-		cBottom = Math.floor((main.cameraPos.y + main.VIEW_HEIGHT) / main.SQUARE);
-		cRight	= Math.floor((main.cameraPos.x + main.VIEW_WIDTH) / main.SQUARE);
-		// Make sure we stay within the tile array bounds
-		cTop	= (cTop < 0) ? 0 : cTop;
-		cLeft	= (cLeft < 0) ? 0 : cLeft;
-		cBottom = (cBottom > (main.tile_arr.length - 1)) ? main.tile_arr.length - 1 : cBottom;
-		cRight	= (cRight > (main.tile_arr[0].length - 1)) ? main.tile_arr[0].length - 1 : cRight;
+			// Calculate how much of the canvas is showing and only draw what we see.
+			cTop	= Math.floor(main.cameraPos.y / main.SQUARE);
+			cLeft	= Math.floor(main.cameraPos.x  / main.SQUARE);
+			cBottom = Math.floor((main.cameraPos.y + main.VIEW_HEIGHT) / main.SQUARE);
+			cRight	= Math.floor((main.cameraPos.x + main.VIEW_WIDTH) / main.SQUARE);
+			// Make sure we stay within the tile array bounds
+			cTop	= (cTop < 0) ? 0 : cTop;
+			cLeft	= (cLeft < 0) ? 0 : cLeft;
+			cBottom = (cBottom > (main.tile_arr.length - 1)) ? main.tile_arr.length - 1 : cBottom;
+			cRight	= (cRight > (main.tile_arr[0].length - 1)) ? main.tile_arr[0].length - 1 : cRight;
 
-		main.context.clearRect(0, 0, main.VIEW_WIDTH, main.VIEW_HEIGHT);
-		main.camera.begin();
+			main.context.clearRect(0, 0, main.VIEW_WIDTH, main.VIEW_HEIGHT);
+			main.camera.begin();
 
-		// Draw Tiles
-		for (y = cTop; y <= cBottom; y++) {
-			for (x = cLeft; x <= cRight; x++) {
-				main.tile_arr[y][x].draw();
+			// Draw Tiles
+			for (y = cTop; y <= cBottom; y++) {
+				for (x = cLeft; x <= cRight; x++) {
+					main.tile_arr[y][x].draw();
+				}
 			}
-		}
-		
-		// Draw grid
-		if (main.showGrid) {
-			for (g = 0; g < main.grid.length; g++) {
-				main.grid[g].draw();
-			}
-		}
-		
 
+			main.camera.end();
+		},
+		tile: function (x, y, width, height) {
+			var xa, ya;
+			xa = x * main.SQUARE;
+			ya = y * main.SQUARE;
 
-		main.camera.end();
+			main.camera.begin();
+
+			main.context.clearRect(xa, ya, width, height);
+			// Draw Tile
+			main.tile_arr[y][x].draw();
+
+			main.camera.end();
+		}
 	}
 
 
