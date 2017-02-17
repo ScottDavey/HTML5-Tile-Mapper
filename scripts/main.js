@@ -388,6 +388,8 @@ var main = {
 					main.buttons.actions.export();
 				} else if (type === 'reset') {
 					main.buttons.actions.reset();
+				} else if (type === 'instructions') {
+					main.buttons.actions.instructions.init();
 				}
 			},
 			load: function () {
@@ -409,8 +411,25 @@ var main = {
 			},
 			reset: function () {
 				main.tiles.reset();
-			}
+			},
+			instructions: {
+				init: function () {
+					var instructionsDialog, overlay, closeBtn;
 
+					instructionsDialog 	= $('#instructionsDialog');
+					overlay 			= $('#dialogOverlay');
+					closeBtn 			= $('#instructionsClose');
+					
+					closeBtn.on('click', main.buttons.actions.instructions.close);
+
+					instructionsDialog.fadeIn(200);
+					overlay.fadeIn(200);
+				},
+				close: function () {
+					$('#instructionsDialog').fadeOut(200);
+					$('#dialogOverlay').fadeOut(200);
+				}
+			}
 		}
 	},
 	dialog: {
