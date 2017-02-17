@@ -65,7 +65,7 @@ li { margin-left:25px; }
 
 #instructionsDialog { width:500px; height:400px; background-color:#000000; border:2px solid #000000; border-radius:10px; position:absolute; top:50%; left:50%; margin-top:-200px; margin-left:-250px; display:none; }
 #instructionsDialog #instructionsHeader { width:450px; padding:13px 25px; background-color:#DCDCDC; color:#111111; border-radius:8px 8px 0px 0px; font-size:14pt; font-weight:bold; }
-#instructionsDialog #instructionsContent { width:460px; height:260px; padding:20px; background-color:#FFFFFF; color:#111111; }
+#instructionsDialog #instructionsContent { width:460px; height:260px; padding:20px; background-color:#FFFFFF; color:#111111; overflow:auto; }
 #instructionsDialog #instructionsFooter { width:500px; height:47px; background-color:#333333; border-radius:0px 0px 8px 8px; }
 #instructionsDialog #instructionsFooter .button { width:100px; margin:2px 2px 0px 2px; padding:12px 0px; color:#000000; text-align:center; float:right; cursor:pointer; }
 #instructionsDialog #instructionsFooter .button.close { background-color:#CCCCCC; border-radius:0px 0px 6px 0px; }
